@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var phase: GamePhase = .idle
     @State private var combo = 1
     @State private var lastTapTime: Date? = nil
+    @State private var isTrap = false
     @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -64,6 +65,14 @@ struct ContentView: View {
                             phase = .playing
                         }
 
+                        // C2: Trap - tapping now costs points
+                        if isTrap {
+                            score = max(score - 2, 0)
+                            combo = 1
+                            lastTapTime = nil
+                            return
+                        }
+
                         // C1: Combo
                         let now = Date()
                         if let last = lastTapTime, now.timeIntervalSince(last) < 0.3 {
@@ -75,11 +84,11 @@ struct ContentView: View {
 
                         score += combo
                     } label: {
-                        Text("TAP")
+                        Text(isTrap ? "STOP" : "TAP")
                             .font(.system(size: 40, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(width: 200, height: 200)
-                            .background(Circle().fill(.pink))
+                            .background(Circle().fill(isTrap ? .red : .pink))
                             .shadow(radius: 10)
                     }
 
@@ -108,6 +117,7 @@ struct ContentView: View {
                             phase = .idle
                             combo = 1
                             lastTapTime = nil
+                            isTrap = false
                         } label: {
                             Text("Play Again")
                                 .font(.title2.bold())
@@ -125,10 +135,21 @@ struct ContentView: View {
                 if timeRemaining > 0 {
                     timeRemaining -= 1
                 }
+
+                // C2: 1 in 3 chance to start a trap
+                if timeRemaining > 0 && Int.random(in: 1...3) == 1 {
+                    isTrap = true
+                    Task {
+                        try? await Task.sleep(for: .seconds(0.5))
+                        isTrap = false
+                    }
+                }
+
                 if timeRemaining == 0 {
                     if score > highScore {
                         highScore = score
                     }
+                    isTrap = false
                     phase = .over
                 }
             }
