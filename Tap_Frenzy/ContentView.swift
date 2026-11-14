@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var score = 0
     @State private var timeRemaining = 10
     @State private var phase: GamePhase = .idle
+    @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -76,6 +77,11 @@ struct ContentView: View {
                             .font(.system(size: 80, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
 
+                        // NEW in Step 6: best score
+                        Text("Best: \(highScore)")
+                            .font(.title3.bold())
+                            .foregroundStyle(.yellow)
+
                         Button {
                             score = 0
                             timeRemaining = 10
@@ -98,6 +104,10 @@ struct ContentView: View {
                     timeRemaining -= 1
                 }
                 if timeRemaining == 0 {
+                    // NEW in Step 6: save the best score
+                    if score > highScore {
+                        highScore = score
+                    }
                     phase = .over
                 }
             }
