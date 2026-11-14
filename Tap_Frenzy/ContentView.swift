@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var score = 0
     var body: some View {
         ZStack {
             // LAYER 1: the background colour (fills the whole screen)
@@ -24,7 +25,7 @@ struct ContentView: View {
                     Text("SCORE")
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.7))
-                    Text("0")
+                    Text("\(score)")
                         .font(.system(size: 80, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                 }
@@ -36,7 +37,7 @@ struct ContentView: View {
 
                 // The big TAP button
                 Button {
-                    // We will add the tap action in Step 3
+                score += 1
                 } label: {
                     Text("TAP")
                         .font(.system(size: 40, weight: .black, design: .rounded))
