@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var combo = 1
     @State private var lastTapTime: Date? = nil
     @State private var isTrap = false
+    @State private var buttonOffset = CGSize.zero
     @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -91,6 +92,7 @@ struct ContentView: View {
                             .background(Circle().fill(isTrap ? .red : .pink))
                             .shadow(radius: 10)
                     }
+                    .offset(buttonOffset)   // C3: moving target
 
                 case .over:
                     // Game over screen
@@ -118,6 +120,7 @@ struct ContentView: View {
                             combo = 1
                             lastTapTime = nil
                             isTrap = false
+                            buttonOffset = .zero
                         } label: {
                             Text("Play Again")
                                 .font(.title2.bold())
@@ -145,11 +148,22 @@ struct ContentView: View {
                     }
                 }
 
+                // C3: move the button to a random spot
+                if timeRemaining > 0 {
+                    withAnimation(.spring(duration: 0.3)) {
+                        buttonOffset = CGSize(
+                            width: Double.random(in: -80...80),
+                            height: Double.random(in: -50...80)
+                        )
+                    }
+                }
+
                 if timeRemaining == 0 {
                     if score > highScore {
                         highScore = score
                     }
                     isTrap = false
+                    buttonOffset = .zero
                     phase = .over
                 }
             }
