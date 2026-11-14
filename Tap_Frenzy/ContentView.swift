@@ -9,6 +9,8 @@ struct ContentView: View {
     @State private var score = 0
     @State private var timeRemaining = 10
     @State private var phase: GamePhase = .idle
+    @State private var combo = 1
+    @State private var lastTapTime: Date? = nil
     @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -37,9 +39,18 @@ struct ContentView: View {
                         Text("SCORE")
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.7))
-                        Text("\(score)")
-                            .font(.system(size: 80, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
+
+                        HStack(alignment: .firstTextBaseline) {
+                            Text("\(score)")
+                                .font(.system(size: 80, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+
+                            // C1: combo label
+                            Text("x\(combo)!")
+                                .font(.system(size: 30, weight: .black, design: .rounded))
+                                .foregroundStyle(.orange)
+                                .opacity(combo > 1 ? 1 : 0)
+                        }
                     }
 
                     // Timer
@@ -52,7 +63,17 @@ struct ContentView: View {
                         if phase == .idle {
                             phase = .playing
                         }
-                        score += 1
+
+                        // C1: Combo
+                        let now = Date()
+                        if let last = lastTapTime, now.timeIntervalSince(last) < 0.3 {
+                            combo = min(combo + 1, 3)
+                        } else {
+                            combo = 1
+                        }
+                        lastTapTime = now
+
+                        score += combo
                     } label: {
                         Text("TAP")
                             .font(.system(size: 40, weight: .black, design: .rounded))
@@ -77,7 +98,6 @@ struct ContentView: View {
                             .font(.system(size: 80, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
 
-                        // NEW in Step 6: best score
                         Text("Best: \(highScore)")
                             .font(.title3.bold())
                             .foregroundStyle(.yellow)
@@ -86,6 +106,8 @@ struct ContentView: View {
                             score = 0
                             timeRemaining = 10
                             phase = .idle
+                            combo = 1
+                            lastTapTime = nil
                         } label: {
                             Text("Play Again")
                                 .font(.title2.bold())
@@ -104,7 +126,6 @@ struct ContentView: View {
                     timeRemaining -= 1
                 }
                 if timeRemaining == 0 {
-                    // NEW in Step 6: save the best score
                     if score > highScore {
                         highScore = score
                     }
