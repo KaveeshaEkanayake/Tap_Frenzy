@@ -14,6 +14,8 @@ struct ContentView: View {
     @State private var isTrap = false
     @State private var buttonOffset = CGSize.zero
     @State private var buttonScale = 1.0
+    @State private var showBonus = false
+    @State private var bonusPosition = CGSize.zero
     @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -129,6 +131,7 @@ struct ContentView: View {
                             isTrap = false
                             buttonOffset = .zero
                             buttonScale = 1.0
+                            showBonus = false
                         } label: {
                             Text("Play Again")
                                 .font(.title2.bold())
@@ -139,6 +142,25 @@ struct ContentView: View {
                         }
                     }
                 }
+            }
+
+            // LAYER 3: C5 bonus burst (on top of everything)
+            if showBonus && phase == .playing {
+                Button {
+                    score += 5
+                    withAnimation {
+                        showBonus = false
+                    }
+                } label: {
+                    Text("+5")
+                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .foregroundStyle(.black)
+                        .frame(width: 60, height: 60)
+                        .background(Circle().fill(.yellow))
+                        .shadow(color: .orange, radius: 10)
+                }
+                .offset(bonusPosition)
+                .transition(.scale)
             }
         }
         .onReceive(timer) { _ in
@@ -166,12 +188,30 @@ struct ContentView: View {
                     }
                 }
 
+                // C5: every 2 seconds, 1 in 2 chance of a bonus
+                if timeRemaining > 1 && timeRemaining % 2 == 0 && Bool.random() {
+                    bonusPosition = CGSize(
+                        width: Double.random(in: -140...140),
+                        height: Double.random(in: -250...250)
+                    )
+                    withAnimation {
+                        showBonus = true
+                    }
+                    Task {
+                        try? await Task.sleep(for: .seconds(1.5))
+                        withAnimation {
+                            showBonus = false
+                        }
+                    }
+                }
+
                 if timeRemaining == 0 {
                     if score > highScore {
                         highScore = score
                     }
                     isTrap = false
                     buttonOffset = .zero
+                    showBonus = false
                     phase = .over
                 }
             }
