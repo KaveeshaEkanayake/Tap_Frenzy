@@ -16,10 +16,11 @@ struct ContentView: View {
     @State private var buttonScale = 1.0
     @State private var showBonus = false
     @State private var bonusPosition = CGSize.zero
+    @State private var scorePop = false          // Stretch 2
     @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-    
-    // Stretch: timer colour changes as time runs out
+
+    // Stretch 1: timer colour changes as time runs out
     var timerColor: Color {
         if phase == .idle {
             return .white
@@ -29,6 +30,19 @@ struct ContentView: View {
             return .orange
         } else {
             return .red
+        }
+    }
+
+    // Stretch 2: make the score pop, then shrink back
+    func popScore() {
+        withAnimation(.spring(duration: 0.15)) {
+            scorePop = true
+        }
+        Task {
+            try? await Task.sleep(for: .seconds(0.1))
+            withAnimation(.spring(duration: 0.2)) {
+                scorePop = false
+            }
         }
     }
 
@@ -62,6 +76,8 @@ struct ContentView: View {
                             Text("\(score)")
                                 .font(.system(size: 80, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
+                                .contentTransition(.numericText())   // Stretch 2: rolling digits
+                                .scaleEffect(scorePop ? 1.3 : 1.0)    // Stretch 2: bounce
 
                             // C1: combo label
                             Text("x\(combo)!")
@@ -84,7 +100,9 @@ struct ContentView: View {
 
                         // C2: Trap - tapping now costs points
                         if isTrap {
-                            score = max(score - 2, 0)
+                            withAnimation {
+                                score = max(score - 2, 0)
+                            }
                             combo = 1
                             lastTapTime = nil
                             return
@@ -99,7 +117,11 @@ struct ContentView: View {
                         }
                         lastTapTime = now
 
-                        score += combo
+                        // Stretch 2: animated score
+                        withAnimation(.spring(duration: 0.15)) {
+                            score += combo
+                        }
+                        popScore()
 
                         // C4: shrink a little on every good tap
                         withAnimation(.easeOut(duration: 0.1)) {
@@ -160,10 +182,12 @@ struct ContentView: View {
             // LAYER 3: C5 bonus burst (on top of everything)
             if showBonus && phase == .playing {
                 Button {
-                    score += 5
-                    withAnimation {
+                    // Stretch 2: animate the bonus too
+                    withAnimation(.spring(duration: 0.15)) {
+                        score += 5
                         showBonus = false
                     }
+                    popScore()
                 } label: {
                     Text("+5")
                         .font(.system(size: 22, weight: .black, design: .rounded))
