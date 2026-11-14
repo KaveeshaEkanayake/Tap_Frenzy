@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var lastTapTime: Date? = nil
     @State private var isTrap = false
     @State private var buttonOffset = CGSize.zero
+    @State private var buttonScale = 1.0
     @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -84,6 +85,11 @@ struct ContentView: View {
                         lastTapTime = now
 
                         score += combo
+
+                        // C4: shrink a little on every good tap
+                        withAnimation(.easeOut(duration: 0.1)) {
+                            buttonScale = max(buttonScale - 0.03, 0.5)
+                        }
                     } label: {
                         Text(isTrap ? "STOP" : "TAP")
                             .font(.system(size: 40, weight: .black, design: .rounded))
@@ -92,7 +98,8 @@ struct ContentView: View {
                             .background(Circle().fill(isTrap ? .red : .pink))
                             .shadow(radius: 10)
                     }
-                    .offset(buttonOffset)   // C3: moving target
+                    .scaleEffect(buttonScale)   // C4: shrinking button
+                    .offset(buttonOffset)       // C3: moving target
 
                 case .over:
                     // Game over screen
@@ -121,6 +128,7 @@ struct ContentView: View {
                             lastTapTime = nil
                             isTrap = false
                             buttonOffset = .zero
+                            buttonScale = 1.0
                         } label: {
                             Text("Play Again")
                                 .font(.title2.bold())
