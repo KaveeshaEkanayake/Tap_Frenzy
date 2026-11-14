@@ -18,16 +18,19 @@ struct ContentView: View {
     @State private var showBonus = false
     @State private var bonusPosition = CGSize.zero
     @State private var scorePop = false          // Stretch 2
+    @State private var roundLength = 10          // Stretch 4
     @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
-    // Stretch 1: timer colour changes as time runs out
+    // Stretch 1 + 4: timer colour based on how much time is left
     var timerColor: Color {
         if phase == .idle {
             return .white
-        } else if timeRemaining > 6 {
+        }
+        let fraction = Double(timeRemaining) / Double(roundLength)
+        if fraction > 0.6 {
             return .green
-        } else if timeRemaining > 3 {
+        } else if fraction > 0.3 {
             return .orange
         } else {
             return .red
@@ -93,9 +96,21 @@ struct ContentView: View {
                         .font(.title2.bold())
                         .foregroundStyle(timerColor)
 
+                    // Stretch 4: choose round length
+                    Picker("Round length", selection: $roundLength) {
+                        Text("5s").tag(5)
+                        Text("10s").tag(10)
+                        Text("20s").tag(20)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 220)
+                    .opacity(phase == .idle ? 1 : 0)
+                    .disabled(phase != .idle)
+
                     // The big TAP button
                     Button {
                         if phase == .idle {
+                            timeRemaining = roundLength   // Stretch 4
                             phase = .playing
                         }
 
@@ -165,7 +180,7 @@ struct ContentView: View {
 
                         Button {
                             score = 0
-                            timeRemaining = 10
+                            timeRemaining = roundLength
                             phase = .idle
                             combo = 1
                             lastTapTime = nil
