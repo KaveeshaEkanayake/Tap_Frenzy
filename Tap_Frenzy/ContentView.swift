@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import UIKit
 
 enum GamePhase {
     case idle, playing, over
@@ -105,6 +106,8 @@ struct ContentView: View {
                             }
                             combo = 1
                             lastTapTime = nil
+                            // Stretch 3: error buzz on a trap
+                            UINotificationFeedbackGenerator().notificationOccurred(.error)
                             return
                         }
 
@@ -122,6 +125,9 @@ struct ContentView: View {
                             score += combo
                         }
                         popScore()
+
+                        // Stretch 3: light buzz on a good tap
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
                         // C4: shrink a little on every good tap
                         withAnimation(.easeOut(duration: 0.1)) {
@@ -188,6 +194,8 @@ struct ContentView: View {
                         showBonus = false
                     }
                     popScore()
+                    // Stretch 3: success buzz on bonus
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
                 } label: {
                     Text("+5")
                         .font(.system(size: 22, weight: .black, design: .rounded))
