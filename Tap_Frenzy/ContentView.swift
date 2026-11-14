@@ -36,7 +36,7 @@ struct ContentView: View {
                 }
 
                 // Timer
-                Text("10s")
+                Text("\(timeRemaining)s")
                     .font(.title2.bold())
                     .foregroundStyle(.yellow)
 
@@ -53,8 +53,15 @@ struct ContentView: View {
                 }
             }
         }
+        .onReceive(timer) { _ in
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            }
+        }
     }
 }
+
+
 
 #Preview {
     ContentView()
