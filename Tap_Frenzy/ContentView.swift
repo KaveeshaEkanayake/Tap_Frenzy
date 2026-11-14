@@ -1,7 +1,12 @@
 import SwiftUI
+import SwiftUI
+import Combine
 
 struct ContentView: View {
     @State private var score = 0
+        @State private var timeRemaining = 10
+        let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
     var body: some View {
         ZStack {
             // LAYER 1: the background colour (fills the whole screen)
