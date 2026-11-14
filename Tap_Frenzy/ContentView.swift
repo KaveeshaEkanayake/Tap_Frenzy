@@ -18,6 +18,19 @@ struct ContentView: View {
     @State private var bonusPosition = CGSize.zero
     @AppStorage("highScore") private var highScore = 0
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    // Stretch: timer colour changes as time runs out
+    var timerColor: Color {
+        if phase == .idle {
+            return .white
+        } else if timeRemaining > 6 {
+            return .green
+        } else if timeRemaining > 3 {
+            return .orange
+        } else {
+            return .red
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -61,7 +74,7 @@ struct ContentView: View {
                     // Timer
                     Text(phase == .idle ? "tap to start" : "\(timeRemaining)s")
                         .font(.title2.bold())
-                        .foregroundStyle(.yellow)
+                        .foregroundStyle(timerColor)
 
                     // The big TAP button
                     Button {
