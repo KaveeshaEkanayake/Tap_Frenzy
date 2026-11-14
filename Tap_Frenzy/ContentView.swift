@@ -1,21 +1,52 @@
-//
-//  ContentView.swift
-//  Tap_Frenzy
-//
-//  Created by 25.2 Student 2 on 2026-11-14.
-//
-
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        ZStack {
+            // LAYER 1: the background colour (fills the whole screen)
+            LinearGradient(
+                colors: [.indigo, .purple],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            // LAYER 2: everything else, stacked top to bottom
+            VStack(spacing: 30) {
+
+                // Title
+                Text("Tap Frenzy")
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+
+                // Score
+                VStack {
+                    Text("SCORE")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+                    Text("0")
+                        .font(.system(size: 80, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+
+                // Timer
+                Text("10s")
+                    .font(.title2.bold())
+                    .foregroundStyle(.yellow)
+
+                // The big TAP button
+                Button {
+                    // We will add the tap action in Step 3
+                } label: {
+                    Text("TAP")
+                        .font(.system(size: 40, weight: .black, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(width: 200, height: 200)
+                        .background(Circle().fill(.pink))
+                        .shadow(radius: 10)
+                }
+            }
         }
-        .padding()
     }
 }
 
